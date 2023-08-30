@@ -1,0 +1,31 @@
+1. producer -> send message to topic -> consumer -> take it and process it.
+
+2. producer -> send (message, topic) -> broker -> consumer -> take it and process it.
+
+3.a producer -> send (message, topic) -> broker -> 
+    do partitions base on hash.
+
+3.b consumer susbcribe to topic -> coordinator (return broker).
+3.c consumer -> take it and process it.
+
+--- 
+add retention
+
+
+3.a producer -> send (message, topic) -> broker -> 
+    do partitions base on hash. store it in noSQL K/V store (
+        key: partition, 
+        value: message,
+        timestamp: 123123123
+    )
+
+3.b consumer susbcribe to topic -> coordinator (return broker).
+3.c consumer -> take it and process it.
+
+
+
+
+
+
+
+
