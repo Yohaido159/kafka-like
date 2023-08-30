@@ -1,13 +1,13 @@
-import { Broker } from "./broker";
+import { IBroker } from './allTypes';
 
 export class Coordinator {
-  private borkers: { [key: string]: Broker };
+  private borkers: { [key: string]: IBroker };
 
   constructor() {
     this.borkers = {};
   }
 
-  attachBrokerToTopic({ topic, broker }: { topic: string; broker: Broker }) {
+  attachBrokerToTopic({ topic, broker }: { topic: string; broker: IBroker }) {
     this.borkers[topic] = broker;
   }
 
@@ -19,7 +19,7 @@ export class Coordinator {
   }
 
   getHashForTopic({ topic }: { topic: string }) {
-    const hash = topic.split("").reduce((acc, char) => {
+    const hash = topic.split('').reduce((acc, char) => {
       return acc + char.charCodeAt(0);
     }, 0);
 

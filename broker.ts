@@ -1,19 +1,4 @@
-import { DataStorage } from "./dataStorage";
-
-export type Message = {
-  topic: string;
-  message: string;
-  partition: number;
-  offset: number;
-};
-
-type Topic = {
-  [key: string]: Message[];
-};
-
-type Partition = {
-  [key: number]: Topic;
-};
+import { DataStorage, Partition } from './allTypes';
 
 export class Broker {
   private topics: Partition = {};
@@ -29,7 +14,7 @@ export class Broker {
 
   addMessage({ topic, message, partition }: { topic: string; message: string; partition: number }) {
     if (!Number.isInteger(partition)) {
-      throw new Error("partition is required");
+      throw new Error('partition is required');
     }
 
     this.dataStorage.add({

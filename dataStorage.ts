@@ -1,10 +1,4 @@
-import { Message } from "./broker";
-
-export interface DataStorage {
-  add({ topic, partition, value }: { topic: string; partition: number; value: Message }): void;
-  get({ topic, partition, offset }: { topic: string; partition: number; offset?: number }): Message[];
-  remove({ topic, partition, offset }: { topic: string; partition: number; offset: number }): void;
-}
+import { DataStorage, Message } from './allTypes';
 
 export class InMemoryDataStorage implements DataStorage {
   private topics: { [key: string]: { [key: number]: Message[] } } = {};

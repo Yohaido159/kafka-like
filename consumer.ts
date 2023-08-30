@@ -1,12 +1,9 @@
-import { Broker } from "./broker";
-import { Coordinator } from "./coordinator";
-import { StateStorage } from "./stateStorage";
-import type { Strategy } from "./strategies";
+import { Strategy, ICoordinator, IStateStorage } from './allTypes';
 
 export class Consumer {
-  private coordinator: Coordinator;
+  private coordinator: ICoordinator;
   private strategy: Strategy;
-  private stateStorage: StateStorage;
+  private stateStorage: IStateStorage;
   private id: string;
 
   constructor({
@@ -15,10 +12,10 @@ export class Consumer {
     strategy,
     stateStorage,
   }: {
-    coordinator: Coordinator;
+    coordinator: ICoordinator;
     id: string;
     strategy: Strategy;
-    stateStorage: StateStorage;
+    stateStorage: IStateStorage;
   }) {
     this.id = id;
     this.coordinator = coordinator;
@@ -28,9 +25,13 @@ export class Consumer {
 
   async pullMessages({ topic, partition, offset }: { topic: string; partition: number; offset?: number }) {
     const currentOffset = offset || this.stateStorage.getCurrentOffset();
-    console.log("🚀 ~ file: consumer.ts:31 ~ Consumer ~ pullMessages ~ currentOffset:", currentOffset);
     const broker = this.coordinator.getBrokerForTopic({ topic });
-    const messages = this.strategy.call({ broker, topic, partition, offset: currentOffset });
+    const messages = this.strategy.call({
+      broker,
+      topic,
+      partition,
+      offset: currentOffset,
+    });
     this.stateStorage.setCurrentOffset(messages[messages.length - 1]?.offset ?? currentOffset);
     messages.map((message) => this.strategy.ack({ broker, topic, partition, offset: message.offset }));
     return messages;

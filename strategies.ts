@@ -1,40 +1,35 @@
-import { Broker, Message } from "./broker";
+import { IBroker, Strategy } from './allTypes';
 
-export interface Strategy {
-  call({ broker, topic, partition, offset }: { broker: Broker; topic: string; partition: number; offset: number }): Message[];
-  ack({ broker, topic, partition, offset }: { broker: Broker; topic: string; partition: number; offset: number }): void;
-}
-
-export class AtMostOnce {
-  call({ broker, topic, partition, offset }: { broker: Broker; topic: string; partition: number; offset: number }) {
+export class AtMostOnce implements Strategy {
+  call({ broker, topic, partition, offset }: { broker: IBroker; topic: string; partition: number; offset: number }) {
     const messages = broker.pollForMessages({ topic, partition, offset });
     messages.forEach((message) => broker.ack({ topic, partition, offset: message.offset }));
     return messages;
   }
 
-  ack({ broker, topic, partition, offset }: { broker: Broker; topic: string; partition: number; offset: number }) {
+  ack({ broker, topic, partition, offset }: { broker: IBroker; topic: string; partition: number; offset: number }) {
     return;
   }
 }
 
-export class AtLeastOnce {
-  call({ broker, topic, partition, offset }: { broker: Broker; topic: string; partition: number; offset: number }) {
+export class AtLeastOnce implements Strategy {
+  call({ broker, topic, partition, offset }: { broker: IBroker; topic: string; partition: number; offset: number }) {
     const messages = broker.pollForMessages({ topic, partition, offset });
     return messages;
   }
 
-  ack({ broker, topic, partition, offset }: { broker: Broker; topic: string; partition: number; offset: number }) {
+  ack({ broker, topic, partition, offset }: { broker: IBroker; topic: string; partition: number; offset: number }) {
     broker.ack({ topic, partition, offset });
   }
 }
 
-export class ExactlyOnce {
-  call({ broker, topic, partition, offset }: { broker: Broker; topic: string; partition: number; offset: number }) {
+export class ExactlyOnce implements Strategy {
+  call({ broker, topic, partition, offset }: { broker: IBroker; topic: string; partition: number; offset: number }) {
     const messages = broker.pollForMessages({ topic, partition, offset });
     return messages;
   }
 
-  ack({ broker, topic, partition, offset }: { broker: Broker; topic: string; partition: number; offset: number }) {
+  ack({ broker, topic, partition, offset }: { broker: IBroker; topic: string; partition: number; offset: number }) {
     broker.ack({ topic, partition, offset });
   }
 }

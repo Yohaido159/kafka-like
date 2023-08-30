@@ -1,4 +1,6 @@
-export class StateStorage {
+import { IStateStorage } from './allTypes';
+
+export class StateStorage implements IStateStorage {
   private currentOffset: number;
 
   constructor() {
