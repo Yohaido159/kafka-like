@@ -1,29 +1,55 @@
+import { DataStorage } from "./dataStorage";
+
+export type Message = {
+  topic: string;
+  message: string;
+  partition: number;
+  offset: number;
+};
+
+type Topic = {
+  [key: string]: Message[];
+};
+
+type Partition = {
+  [key: number]: Topic;
+};
+
 export class Broker {
-  private topics: { [key: string]: string[] } = {};
-  private messages: { [key: string]: string[] } = {};
+  private topics: Partition = {};
+  private dataStorage: DataStorage;
 
-  constructor() {
-    this.topics = {};
-    this.messages = {};
-  }
-
-  addMessage({ topic, message }) {
-    if (!this.messages[topic]) {
-      this.messages[topic] = [];
+  constructor({ partitionsCount, dataStorage }: { partitionsCount: number; dataStorage: DataStorage }) {
+    for (let i = 0; i < partitionsCount; i++) {
+      this.topics[i] = {};
     }
 
-    this.messages[topic].push(message);
+    this.dataStorage = dataStorage;
   }
 
-  addConsumer({ topic, consumer }) {
-    if (!this.topics[topic]) {
-      this.topics[topic] = [];
+  addMessage({ topic, message, partition }: { topic: string; message: string; partition: number }) {
+    if (!Number.isInteger(partition)) {
+      throw new Error("partition is required");
     }
 
-    this.topics[topic].push(consumer);
+    this.dataStorage.add({
+      topic,
+      partition,
+      value: {
+        topic,
+        message,
+        partition,
+        offset: this.dataStorage.get({ topic, partition }).length,
+      },
+    });
   }
 
-  pollForMessages({ topic }) {
-    return this.topics[topic];
+  pollForMessages({ topic, partition, offset }: { topic: string; partition: number; offset: number }) {
+    const messages = this.dataStorage.get({ topic, partition, offset });
+    return messages;
+  }
+
+  ack({ topic, partition, offset }: { topic: string; partition: number; offset: number }) {
+    this.dataStorage.remove({ topic, partition, offset });
   }
 }
