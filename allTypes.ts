@@ -19,29 +19,21 @@ export interface DataStorage {
   remove({ topic, partition, offset }: { topic: string; partition: number; offset: number }): void;
 }
 
+type StrategyAck = {
+  broker: IBroker;
+  topic: string;
+  partition: number;
+  offset: number;
+};
+
+type StrategyCall = {
+  consumer: IConsumer;
+  messages: Message[];
+};
+
 export interface Strategy {
-  call({
-    broker,
-    topic,
-    partition,
-    offset,
-  }: {
-    broker: IBroker;
-    topic: string;
-    partition: number;
-    offset: number;
-  }): Message[];
-  ack({
-    broker,
-    topic,
-    partition,
-    offset,
-  }: {
-    broker: IBroker;
-    topic: string;
-    partition: number;
-    offset: number;
-  }): void;
+  call({ consumer, messages }: StrategyCall): Message[];
+  ack({ broker, topic, partition, offset }: StrategyAck): void;
 }
 
 export interface IBroker {
@@ -57,5 +49,10 @@ export interface ICoordinator {
 
 export interface IStateStorage {
   getCurrentOffset(): number;
+  setCurrentOffset(offset: number): void;
+}
+
+export interface IConsumer {
+  pullMessages({ topic, partition, offset }: { topic: string; partition: number; offset?: number }): void;
   setCurrentOffset(offset: number): void;
 }
