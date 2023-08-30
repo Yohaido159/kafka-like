@@ -24,8 +24,8 @@ export class InMemoryDataStorage implements DataStorage {
       return [];
     }
 
-    const newMessages = [...this.topics[topic][partition]];
-    offset && newMessages.slice(offset);
+    let newMessages = [...this.topics[topic][partition]];
+    offset && (newMessages = newMessages.slice(offset));
     return newMessages;
   }
 

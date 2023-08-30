@@ -1,9 +1,8 @@
-import { IBroker, Strategy } from './allTypes';
+import { IBroker, IConsumer, Message, Strategy } from './allTypes';
 
 export class AtMostOnce implements Strategy {
-  call({ broker, topic, partition, offset }: { broker: IBroker; topic: string; partition: number; offset: number }) {
-    const messages = broker.pollForMessages({ topic, partition, offset });
-    messages.forEach((message) => broker.ack({ topic, partition, offset: message.offset }));
+  call({ consumer, messages }: { messages: Message[]; consumer: IConsumer }) {
+    consumer.setCurrentOffset(messages[messages.length - 1].offset + 1);
     return messages;
   }
 
@@ -13,13 +12,12 @@ export class AtMostOnce implements Strategy {
 }
 
 export class AtLeastOnce implements Strategy {
-  call({ broker, topic, partition, offset }: { broker: IBroker; topic: string; partition: number; offset: number }) {
-    const messages = broker.pollForMessages({ topic, partition, offset });
+  call({ consumer, messages }: { messages: Message[]; consumer: IConsumer }) {
     return messages;
   }
 
   ack({ broker, topic, partition, offset }: { broker: IBroker; topic: string; partition: number; offset: number }) {
-    broker.ack({ topic, partition, offset });
+    // broker.ack({ topic, partition, offset });
   }
 }
 
@@ -30,6 +28,6 @@ export class ExactlyOnce implements Strategy {
   }
 
   ack({ broker, topic, partition, offset }: { broker: IBroker; topic: string; partition: number; offset: number }) {
-    broker.ack({ topic, partition, offset });
+    // broker.ack({ topic, partition, offset });
   }
 }
