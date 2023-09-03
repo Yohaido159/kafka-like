@@ -95,13 +95,18 @@ describe('Kafka Strategies', () => {
       producer = new Producer({ coordinator, strategy });
 
       await producer.send({ topic: 'test', message: 'message1' });
+      await producer.send({ topic: 'test', message: 'message1' });
+
       consumer = new Consumer({
         coordinator,
         strategy,
         id: 'consumer1',
       });
 
-      expect(dataStorage.get({ topic: 'test' })).toContainEqual({ message: 'message1', offset: 0, topic: 'test' });
+      expect(await consumer.pullMessages({ topic: 'test' })).toEqual([
+        { message: 'message1', offset: 0, topic: 'test' },
+        { message: 'message1', offset: 1, topic: 'test' },
+      ]);
     });
 
     test('Consumer should send an acknowledgment after processing', async () => {

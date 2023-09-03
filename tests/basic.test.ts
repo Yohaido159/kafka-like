@@ -49,7 +49,6 @@ describe('Kafka-like System', () => {
         {
           topic: 'test',
           message: 'hello world',
-
           offset: 0,
         },
       ]);
@@ -67,7 +66,6 @@ describe('Kafka-like System', () => {
         {
           topic: 'test',
           message: 'hello world',
-
           offset: 0,
         },
       ]);
@@ -99,7 +97,6 @@ describe('Kafka-like System', () => {
         {
           topic: 'test',
           message: 'hello world',
-
           offset: 0,
         },
       ]);
@@ -141,32 +138,6 @@ describe('Kafka-like System', () => {
       ]);
     });
 
-    test('Consumer acknowledgment', async () => {
-      const message = 'hello world';
-      const topic = 'test';
-
-      const consumer = new Consumer({
-        coordinator,
-        strategy,
-        id: 'consumer1',
-      });
-
-      await producer.send({ topic, message });
-
-      expect(await consumer.pullMessages({ topic })).toEqual([
-        {
-          topic: 'test',
-          message: 'hello world',
-
-          offset: 0,
-        },
-      ]);
-
-      // consumer.ack({ topic, offset: 0 });
-
-      expect(await consumer.pullMessages({ topic })).toEqual([]);
-    });
-
     test('Consumer offset management', async () => {
       const message = 'hello world';
       const topic = 'test';
@@ -187,9 +158,7 @@ describe('Kafka-like System', () => {
         },
       ]);
 
-      producer.send({ topic, message: 'hello world 2' });
-
-      // consumer.ack({ topic, offset: 0 });
+      await producer.send({ topic, message: 'hello world 2' });
 
       expect(await consumer.pullMessages({ topic })).toEqual([
         {
@@ -198,12 +167,6 @@ describe('Kafka-like System', () => {
           offset: 1,
         },
       ]);
-    });
-
-    test('Broker failure', () => {
-      // Setup
-      // Execution
-      // Assertions
     });
   });
 });
