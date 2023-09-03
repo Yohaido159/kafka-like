@@ -40,6 +40,7 @@ export interface IBroker {
   addMessage({ topic, message, partition }: { topic: string; message: string; partition: number }): void;
   pollForMessages({ topic, partition, offset }: { topic: string; partition: number; offset: number }): Message[];
   ack({ topic, partition, offset }: { topic: string; partition: number; offset: number }): void;
+  partitionCount: number;
 }
 
 export interface ICoordinator {
@@ -55,4 +56,5 @@ export interface IStateStorage {
 export interface IConsumer {
   pullMessages({ topic, partition, offset }: { topic: string; partition: number; offset?: number }): void;
   setCurrentOffset(offset: number): void;
+  ack({ topic, partition, offset }: { topic: string; partition: number; offset: number }): void;
 }

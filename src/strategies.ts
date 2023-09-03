@@ -22,8 +22,7 @@ export class AtLeastOnce implements Strategy {
 }
 
 export class ExactlyOnce implements Strategy {
-  call({ broker, topic, partition, offset }: { broker: IBroker; topic: string; partition: number; offset: number }) {
-    const messages = broker.pollForMessages({ topic, partition, offset });
+  call({ consumer, messages }: { messages: Message[]; consumer: IConsumer }) {
     return messages;
   }
 

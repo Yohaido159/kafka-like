@@ -26,15 +26,16 @@ export class Consumer implements IConsumer {
   async pullMessages({ topic, partition, offset }: { topic: string; partition: number; offset?: number }) {
     const currentOffset = offset ?? this.stateStorage.getCurrentOffset();
     const broker = this.coordinator.getBrokerForTopic({ topic });
-    const messages = this.strategy.call({
-      messages: broker.pollForMessages({ topic, partition, offset: currentOffset }),
-      consumer: this,
-    });
+    const messagesPulled = broker.pollForMessages({ topic, partition, offset: currentOffset });
 
-    return messages;
+    return messagesPulled;
   }
 
   setCurrentOffset(offset: number) {
     this.stateStorage.setCurrentOffset(offset);
+  }
+
+  ack({ topic, partition, offset }: { topic: string; partition: number; offset: number }) {
+    this.stateStorage.setCurrentOffset(offset + 1);
   }
 }

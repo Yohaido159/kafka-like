@@ -1,5 +1,5 @@
-import { Broker } from "./broker";
-import { Coordinator } from "./coordinator";
+import { Broker } from './broker';
+import { Coordinator } from './coordinator';
 
 export class Producer {
   private coordinator: Coordinator;
@@ -8,8 +8,9 @@ export class Producer {
     this.coordinator = coordinator;
   }
 
-  send({ topic, message, partition }: { topic: string; message: string; partition: number }) {
+  send({ topic, message }: { topic: string; message: string }) {
     const broker = this.coordinator.getBrokerForTopic({ topic });
+    const partition = this.coordinator.getPartitionIndex({ message, topic, broker });
     broker.addMessage({ topic, message, partition });
   }
 }

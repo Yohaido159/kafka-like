@@ -1,15 +1,12 @@
 import { DataStorage, Partition } from './allTypes';
 
 export class Broker {
-  private topics: Partition = {};
   private dataStorage: DataStorage;
+  public partitionCount: number;
 
-  constructor({ partitionsCount, dataStorage }: { partitionsCount: number; dataStorage: DataStorage }) {
-    for (let i = 0; i < partitionsCount; i++) {
-      this.topics[i] = {};
-    }
-
+  constructor({ dataStorage, partitionCount }: { dataStorage: DataStorage; partitionCount: number }) {
     this.dataStorage = dataStorage;
+    this.partitionCount = partitionCount;
   }
 
   addMessage({ topic, message, partition }: { topic: string; message: string; partition: number }) {

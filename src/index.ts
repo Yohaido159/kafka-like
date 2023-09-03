@@ -1,10 +1,10 @@
 import { Broker } from './broker';
 import { Consumer } from './consumer';
 import { Coordinator } from './coordinator';
-import { InMemoryDataStorage } from './dataStorage';
+import { InDiskDataStorage, InMemoryDataStorage } from './dataStorage';
 import { Producer } from './producer';
-import { StateStorage } from './stateStorage';
-import { AtLeastOnce } from './strategies';
+import { StateStorage } from '../stateStorage';
+import { AtLeastOnce } from '../strategies';
 
 const Main = async () => {
   const broker = new Broker({
@@ -22,6 +22,9 @@ const Main = async () => {
     strategy: new AtLeastOnce(),
     stateStorage: new StateStorage(),
   });
+
+  // producer.send({ topic: 'test', message: `${Math.random()} message from producer`, partition: 0 });
+  // producer.send({ topic: 'test', message: `${Math.random()} message from producer`, partition: 0 });
 
   setInterval(() => {
     producer.send({ topic: 'test', message: `${Math.random()} message from producer`, partition: 0 });
