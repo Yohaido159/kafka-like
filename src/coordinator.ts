@@ -1,6 +1,6 @@
-import { IBroker } from './allTypes';
+import { IBroker, ICoordinator } from './allTypes';
 
-export class Coordinator {
+export class Coordinator implements ICoordinator {
   private borkers: { [key: string]: IBroker[] };
 
   constructor() {
@@ -20,13 +20,6 @@ export class Coordinator {
     const brokers = this.borkers[topic];
     const index = hash % brokers.length;
     return brokers[index];
-  }
-
-  getPartitionIndex({ message, topic, broker }: { message: string; topic: string; broker: IBroker }) {
-    const hash = this.getHashFormString({ string: `${topic}:${message}` });
-    const partitionsIndex = broker.partitionCount;
-    const index = hash % partitionsIndex;
-    return index;
   }
 
   getHashFormString({ string }: { string: string }) {

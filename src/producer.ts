@@ -1,16 +1,17 @@
-import { Broker } from './broker';
+import { ICoordinator, IProducer, IStrategy } from './allTypes';
 import { Coordinator } from './coordinator';
 
-export class Producer {
-  private coordinator: Coordinator;
+export class Producer implements IProducer {
+  private coordinator: ICoordinator;
+  private strategy: IStrategy;
 
-  constructor({ coordinator }: { coordinator: Coordinator }) {
+  constructor({ coordinator, strategy }: { coordinator: ICoordinator; strategy: IStrategy }) {
     this.coordinator = coordinator;
+    this.strategy = strategy;
   }
 
-  send({ topic, message }: { topic: string; message: string }) {
+  async send({ topic, message }: { topic: string; message: string }) {
     const broker = this.coordinator.getBrokerForTopic({ topic });
-    const partition = this.coordinator.getPartitionIndex({ message, topic, broker });
-    broker.addMessage({ topic, message, partition });
+    await this.strategy.sendMessage({ topic, message, broker });
   }
 }

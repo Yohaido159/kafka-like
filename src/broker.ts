@@ -1,37 +1,27 @@
-import { DataStorage, Partition } from './allTypes';
+import { DataStorage, IBroker } from './allTypes';
 
-export class Broker {
-  private dataStorage: DataStorage;
-  public partitionCount: number;
+export class Broker implements IBroker {
+  public dataStorage: DataStorage;
 
-  constructor({ dataStorage, partitionCount }: { dataStorage: DataStorage; partitionCount: number }) {
+  constructor({ dataStorage }: { dataStorage: DataStorage }) {
     this.dataStorage = dataStorage;
-    this.partitionCount = partitionCount;
   }
 
-  addMessage({ topic, message, partition }: { topic: string; message: string; partition: number }) {
-    if (!Number.isInteger(partition)) {
-      throw new Error('partition is required');
-    }
-
-    this.dataStorage.add({
-      topic,
-      partition,
-      value: {
+  async addMessage({ topic, message }: { topic: string; message: string }) {
+    try {
+      this.dataStorage.add({
         topic,
-        message,
-        partition,
-        offset: this.dataStorage.get({ topic, partition }).length,
-      },
-    });
+        value: {
+          topic,
+          message,
+          offset: this.dataStorage.get({ topic }).length,
+        },
+      });
+    } catch (error) {}
   }
 
-  pollForMessages({ topic, partition, offset }: { topic: string; partition: number; offset: number }) {
-    const messages = this.dataStorage.get({ topic, partition, offset });
+  async pollForMessages({ topic, offset }: { topic: string; offset: number }) {
+    const messages = this.dataStorage.get({ topic, offset });
     return messages;
-  }
-
-  ack({ topic, partition, offset }: { topic: string; partition: number; offset: number }) {
-    this.dataStorage.remove({ topic, partition, offset });
   }
 }

@@ -1,12 +1,13 @@
+import { StateStorage } from '../stateStorage';
+import { AtLeastOnce } from '../strategies';
+
 import { Broker } from './broker';
 import { Consumer } from './consumer';
 import { Coordinator } from './coordinator';
 import { InDiskDataStorage, InMemoryDataStorage } from './dataStorage';
 import { Producer } from './producer';
-import { StateStorage } from '../stateStorage';
-import { AtLeastOnce } from '../strategies';
 
-const Main = async () => {
+const Main = () => {
   const broker = new Broker({
     partitionsCount: 2,
     dataStorage: new InMemoryDataStorage(),
@@ -23,15 +24,12 @@ const Main = async () => {
     stateStorage: new StateStorage(),
   });
 
-  // producer.send({ topic: 'test', message: `${Math.random()} message from producer`, partition: 0 });
-  // producer.send({ topic: 'test', message: `${Math.random()} message from producer`, partition: 0 });
-
   setInterval(() => {
-    producer.send({ topic: 'test', message: `${Math.random()} message from producer`, partition: 0 });
+    producer.send({ topic: 'test', message: `${Math.random()} message from producer` });
   }, 1000);
 
-  setInterval(async () => {
-    const messages = await consumer.pullMessages({ topic: 'test', partition: 0 });
+  setInterval(() => {
+    const messages = consumer.pullMessages({ topic: 'test' });
   }, 1000);
 };
 

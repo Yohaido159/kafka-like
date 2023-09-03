@@ -1,28 +1,23 @@
 export type Message = {
   topic: string;
   message: string;
-  partition: number;
   offset: number;
+  id?: string;
 };
 
 export type Topic = {
   [key: string]: Message[];
 };
 
-export type Partition = {
-  [key: number]: Topic;
-};
-
 export interface DataStorage {
-  add({ topic, partition, value }: { topic: string; partition: number; value: Message }): void;
-  get({ topic, partition, offset }: { topic: string; partition: number; offset?: number }): Message[];
-  remove({ topic, partition, offset }: { topic: string; partition: number; offset: number }): void;
+  add({ topic, value }: { topic: string; value: Message }): void;
+  get({ topic, offset }: { topic: string; offset?: number }): Message[];
+  remove({ topic, offset }: { topic: string; offset: number }): void;
 }
 
 type StrategyAck = {
   broker: IBroker;
   topic: string;
-  partition: number;
   offset: number;
 };
 
@@ -33,28 +28,42 @@ type StrategyCall = {
 
 export interface Strategy {
   call({ consumer, messages }: StrategyCall): Message[];
-  ack({ broker, topic, partition, offset }: StrategyAck): void;
+  ack({ broker, topic, offset }: StrategyAck): void;
 }
 
 export interface IBroker {
-  addMessage({ topic, message, partition }: { topic: string; message: string; partition: number }): void;
-  pollForMessages({ topic, partition, offset }: { topic: string; partition: number; offset: number }): Message[];
-  ack({ topic, partition, offset }: { topic: string; partition: number; offset: number }): void;
-  partitionCount: number;
+  addMessage({ topic, message }: { topic: string; message: string }): Promise<void>;
+  pollForMessages({ topic, offset }: { topic: string; offset: number }): Promise<Message[]>;
 }
 
 export interface ICoordinator {
   attachBrokerToTopic({ topic, broker }: { topic: string; broker: IBroker }): void;
   getBrokerForTopic({ topic }: { topic: string }): IBroker;
+  getHashFormString({ string }: { string: string }): number;
 }
 
 export interface IStateStorage {
-  getCurrentOffset(): number;
-  setCurrentOffset(offset: number): void;
+  setOffset({ topic, offset, consumerId }: { topic: string; offset: number; consumerId: string }): void;
+  getOffset({ topic, consumerId }: { topic: string; consumerId: string }): number;
 }
 
 export interface IConsumer {
-  pullMessages({ topic, partition, offset }: { topic: string; partition: number; offset?: number }): void;
-  setCurrentOffset(offset: number): void;
-  ack({ topic, partition, offset }: { topic: string; partition: number; offset: number }): void;
+  pullMessages({ topic, offset }: { topic: string; offset?: number }): Promise<Message[]>;
+}
+
+export interface IProducer {
+  send({ topic, message }: { topic: string; message: string }): Promise<void>;
+}
+
+export interface IStrategy {
+  sendMessage({ topic, message, broker }: { topic: string; message: string; broker: IBroker }): Promise<void>;
+  pullMessages({
+    broker,
+    topic,
+    consumerId,
+  }: {
+    broker: IBroker;
+    topic: string;
+    consumerId: string;
+  }): Promise<Message[]>;
 }

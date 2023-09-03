@@ -1,41 +1,18 @@
-import { Strategy, ICoordinator, IStateStorage, IConsumer } from './allTypes';
+import { ICoordinator, IStateStorage, IConsumer, IStrategy } from './allTypes';
 
 export class Consumer implements IConsumer {
   private coordinator: ICoordinator;
-  private strategy: Strategy;
-  public stateStorage: IStateStorage;
+  private strategy: IStrategy;
   private id: string;
 
-  constructor({
-    coordinator,
-    id,
-    strategy,
-    stateStorage,
-  }: {
-    coordinator: ICoordinator;
-    id: string;
-    strategy: Strategy;
-    stateStorage: IStateStorage;
-  }) {
-    this.id = id;
+  constructor({ coordinator, strategy, id }: { coordinator: ICoordinator; strategy: IStrategy; id: string }) {
     this.coordinator = coordinator;
     this.strategy = strategy;
-    this.stateStorage = stateStorage;
+    this.id = id;
   }
 
-  async pullMessages({ topic, partition, offset }: { topic: string; partition: number; offset?: number }) {
-    const currentOffset = offset ?? this.stateStorage.getCurrentOffset();
+  async pullMessages({ topic }: { topic: string }) {
     const broker = this.coordinator.getBrokerForTopic({ topic });
-    const messagesPulled = broker.pollForMessages({ topic, partition, offset: currentOffset });
-
-    return messagesPulled;
-  }
-
-  setCurrentOffset(offset: number) {
-    this.stateStorage.setCurrentOffset(offset);
-  }
-
-  ack({ topic, partition, offset }: { topic: string; partition: number; offset: number }) {
-    this.stateStorage.setCurrentOffset(offset + 1);
+    return await this.strategy.pullMessages({ broker, topic, consumerId: this.id });
   }
 }

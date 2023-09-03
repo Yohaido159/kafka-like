@@ -1,17 +1,31 @@
 import { IStateStorage } from './allTypes';
 
+export type TopicState = {
+  [key: string]: {
+    offset: number;
+  };
+};
+
 export class StateStorage implements IStateStorage {
-  private currentOffset: number;
+  private topics: { [key: string]: TopicState } = {};
 
   constructor() {
-    this.currentOffset = 0;
+    this.topics = {};
   }
 
-  getCurrentOffset() {
-    return this.currentOffset;
+  setOffset({ topic, consumerId, offset }: { topic: string; consumerId: string; offset: number }) {
+    if (!this.topics[topic]) {
+      this.topics[topic] = {};
+    }
+
+    if (!this.topics[topic][consumerId]) {
+      this.topics[topic][consumerId] = { offset };
+    }
+
+    this.topics[topic][consumerId].offset = offset;
   }
 
-  setCurrentOffset(offset: number) {
-    this.currentOffset = offset;
+  getOffset({ topic, consumerId }: { topic: string; consumerId: string }): number {
+    return this.topics[topic] && this.topics[topic][consumerId] ? this.topics[topic][consumerId].offset : 0;
   }
 }
